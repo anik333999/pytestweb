@@ -9,7 +9,57 @@
 </head>
 <body>
     <py-script>
-    
+    import http.server
+import socketserver
+import threading
+import webbrowser
+import os
+import sys
+
+class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(self.html_content.encode())
+        else:
+            super().do_GET()
+
+def serve():
+    port = 8000
+    handler = MyHandler
+
+    with socketserver.TCPServer(("", port), handler) as httpd:
+        print(f"Serving on port {port}")
+        webbrowser.open_new_tab(f"http://localhost:{port}")
+        httpd.serve_forever()
+
+if __name__ == '__main__':
+    # Input your own HTML content
+    user_html = input("Enter your HTML content:\n")
+
+    # Use the user-provided HTML or the default content
+    html_content = user_html if user_html.strip() else """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>My HTML App</title>
+    </head>
+    <body>
+        <h1>Hello, World!</h1>
+        <p>This is a simple HTML app served by a Python script.</p>
+    </body>
+    </html>
+    """
+
+    server_thread = threading.Thread(target=serve)
+    server_thread.start()
+    try:
+        server_thread.join()
+    except KeyboardInterrupt:
+        sys.exit(0)
+
     <py-script>
 </body>
 </html>
